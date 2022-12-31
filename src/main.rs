@@ -1,6 +1,7 @@
 #![feature(async_iterator)]
 use anyhow::{bail, Result};
 use clap::Parser;
+use commandstream::CommandStream;
 use directories_next::ProjectDirs;
 use log::debug;
 use std::path::PathBuf;
@@ -13,8 +14,6 @@ use app::App;
 
 mod args;
 use args::Args;
-
-mod xcommand;
 
 // TODO: only run subprocess under tty if this program was run under a tty
 
@@ -64,5 +63,5 @@ async fn main() -> Result<()> {
     debug!("Running");
     let return_code = indenter.run().await?;
     debug!("Done");
-    Ok(())
+    std::process::exit(return_code);
 }

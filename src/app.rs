@@ -1,9 +1,7 @@
 use crate::config::Config;
-use crate::xcommand::{StdioType, XCommand};
 use anyhow::{bail, Result};
-use futures_util::pin_mut;
+use commandstream::CommandStream;
 use log::debug;
-use tokio_stream::StreamExt;
 
 pub struct App<'a> {
     stdout_ind: String,
@@ -41,27 +39,20 @@ impl<'a> App<'a> {
             stderr_ind,
         })
     }
-    pub async fn run(&self) -> Result<i32> {
-        let Some((exec, exec_args)) = self.command.split_first() else {
-            bail!("Invaid input command");
-        };
-        let cmd = XCommand::new(exec, exec_args);
-        let child = cmd.spawn().await.unwrap();
-        debug!("Child pid: {}", child.pid());
+}
 
-        let s = child.stream();
-        pin_mut!(s);
-        while let Some(output) = s.next().await {
-            let (source, line) = output.unwrap();
-            match source {
-                StdioType::Stdout => {
-                    println!("{}{}", self.stdout_ind, line);
-                }
-                StdioType::Stderr => {
-                    eprintln!("{}{}", self.stderr_ind, line);
-                }
-            }
-        }
-        Ok(0)
+impl<'a> CommandStream<'_> for App<'a> {
+    fn command(&self) -> &[String] {
+        &self.command
+    }
+
+    fn handle_stdout(&self, line: &str) -> Result<()> {
+        println!("{}{}", self.stdout_ind, line);
+        Ok(())
+    }
+
+    fn handle_stderr(&self, line: &str) -> Result<()> {
+        eprintln!("{}{}", self.stderr_ind, line);
+        Ok(())
     }
 }
