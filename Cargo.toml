@@ -9,7 +9,7 @@ repository = "https://github.com/adam-gaia/ind"
 homepage = "https://github.com/adam-gaia/ind"
 
 [dependencies]
-commandstream = "0.2.0"
+commandstream = "0.3.0"
 anyhow = "1.0.65"
 async-stream = "0.3.3"
 clap = { version = "4.0.15", features = ["derive", "cargo"] }
